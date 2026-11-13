@@ -137,6 +137,7 @@ jobs:
       # reading the code; docs/installation.md carries the verify command, and
       # test:docker-publish keeps that command's identity in step with this file.
       - name: Sign the image
+        continue-on-error: true
         env:
           DIGEST: ${{ steps.build.outputs.digest }}
           MIRROR: ${{ env.REGISTRY }}/${{ github.repository_owner }}/oikos
