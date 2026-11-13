@@ -1,0 +1,38 @@
+# Yuvomi for Arcane: paste this compose configuration and environment variables into an Arcane project on TrueNAS.
+# The image is built and published automatically by GitHub Actions to GHCR: ghcr.io/zbergus/yuvomi:main
+services:
+  yuvomi:
+    image: ghcr.io/zbergus/yuvomi:${YUVOMI_TAG:-main}
+    container_name: yuvomi
+    restart: unless-stopped
+    ports:
+      - "${YUVOMI_PUBLISH_ADDR:-0.0.0.0}:${YUVOMI_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - DB_PATH=/data/yuvomi.db
+      - BACKUP_DIR=/backups
+      - MODULES_DIR=/app/modules
+      # Set SESSION_SECRET to a random 64-char hex string (e.g. openssl rand -hex 32)
+      - SESSION_SECRET=${SESSION_SECRET}
+      # Optional: SQLCipher DB encryption key (leave empty for unencrypted SQLite)
+      - DB_ENCRYPTION_KEY=${DB_ENCRYPTION_KEY:-}
+      # Allows connecting to self-hosted LAN / Docker-internal recipe providers like Norish
+      - RECIPE_PROVIDER_ALLOW_PRIVATE_NETWORK=${RECIPE_PROVIDER_ALLOW_PRIVATE_NETWORK:-true}
+      # Document storage (optional)
+      - DOCUMENT_STORAGE_LOCAL_ENABLED=${DOCUMENT_STORAGE_LOCAL_ENABLED:-false}
+      - DOCUMENT_STORAGE_LOCAL_PATH=${DOCUMENT_STORAGE_LOCAL_PATH:-/documents}
+      # Reverse proxy / cookie configuration
+      - BASE_URL=${BASE_URL:-}
+      - SESSION_SECURE=${SESSION_SECURE:-false}
+      - TRUST_PROXY=${TRUST_PROXY:-loopback}
+    volumes:
+      - ${YUVOMI_DATA_DIR:-/mnt/apps/yuvomi/data}:/data
+      - ${YUVOMI_BACKUP_DIR:-/mnt/apps/yuvomi/backups}:/backups
+      - ${YUVOMI_MODULES_DIR:-/mnt/apps/yuvomi/modules}:/app/modules
+      - ${YUVOMI_DOCUMENTS_DIR:-/mnt/apps/yuvomi/documents}:/documents
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
