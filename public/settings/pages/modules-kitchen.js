@@ -32,7 +32,9 @@ function builtInMealTypeLabel(mealType) {
 // Anzeigename je Provider - Eigenname, keine i18n-Übersetzung (wie
 // recipes.sourceMealie/sourceTandoor in jeder Locale unübersetzt bleiben).
 function providerLabel(provider) {
-  return provider === 'tandoor' ? 'Tandoor' : 'Mealie';
+  if (provider === 'tandoor') return 'Tandoor';
+  if (provider === 'norish') return 'Norish';
+  return 'Mealie';
 }
 
 function showToast(message, tone = 'default') {
@@ -383,6 +385,7 @@ function bindProviderAddButton(container) {
               control: `<select class="form-input" id="recipe-provider-select">
                 <option value="mealie">Mealie</option>
                 <option value="tandoor">Tandoor</option>
+                <option value="norish">Norish</option>
               </select>`,
             }),
             formRowHtml({
@@ -425,9 +428,13 @@ function bindProviderAddButton(container) {
         // je nachdem, wo der Nutzer den API-Token erzeugt.
         providerSelect.addEventListener('change', () => {
           const label = providerLabel(providerSelect.value);
-          tokenHint.textContent = providerSelect.value === 'tandoor'
-            ? t('settings.recipeProviderTokenHintTandoor')
-            : t('settings.recipeProviderTokenHintMealie');
+          if (providerSelect.value === 'tandoor') {
+            tokenHint.textContent = t('settings.recipeProviderTokenHintTandoor');
+          } else if (providerSelect.value === 'norish') {
+            tokenHint.textContent = t('settings.recipeProviderTokenHintNorish');
+          } else {
+            tokenHint.textContent = t('settings.recipeProviderTokenHintMealie');
+          }
           externalUrlHint.textContent = t('settings.recipeProviderExternalUrlHint', { provider: label });
         });
 
