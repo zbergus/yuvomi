@@ -231,3 +231,59 @@ test('migration v255: last_error_reason/last_error_params kommen dazu, Bestand b
   // Ein zweiter Lauf (etwa eine teilweise angewandte Datenbank) bricht nicht ab.
   assert.doesNotThrow(() => v255.up(db));
 });
+
+// --------------------------------------------------------------------------
+// Migration v283: CHECK(provider IN ('mealie', 'tandoor', 'norish'))
+// --------------------------------------------------------------------------
+
+test('migration v283: recipe_provider_accounts erlaubt provider norish, behaelt Bestand und FK-Integritaet', (t) => {
+  const db = buildMigratedDatabase(MIGRATIONS.filter(({ version }) => version <= 282));
+  t.after(() => db.close());
+  const userId = db.prepare(`
+    INSERT INTO users (username, display_name, password_hash, role) VALUES ('admin', 'Admin', 'hash', 'admin')
+  `).run().lastInsertRowid;
+  const mealieId = db.prepare(`
+    INSERT INTO recipe_provider_accounts (name, base_url, api_token, provider, created_by)
+    VALUES ('Mealie', 'https://mealie.example.test', 'tok-1', 'mealie', ?)
+  `).run(userId).lastInsertRowid;
+
+  const recipeId = db.prepare(`
+    INSERT INTO recipes (title, created_by, provider_account_id, provider_recipe_id)
+    VALUES ('Gespiegelt', ?, ?, 'uuid-1')
+  `).run(userId, mealieId).lastInsertRowid;
+
+  // Vor v283 muss norish am CHECK scheitern
+  assert.throws(() => db.prepare(`
+    INSERT INTO recipe_provider_accounts (name, base_url, api_token, provider, created_by)
+    VALUES ('Norish', 'https://norish.example.test', 'tok-2', 'norish', ?)
+  `).run(userId), /CHECK constraint failed/);
+
+  const v283 = MIGRATIONS.find(({ version }) => version === 283);
+  assert.ok(v283, 'v283 steht in MIGRATIONS');
+  applyMigration(db, v283);
+
+  // Nach v283 muss norish erfolgreich eingefuegt werden
+  const norishId = db.prepare(`
+    INSERT INTO recipe_provider_accounts (name, base_url, api_token, provider, created_by)
+    VALUES ('Norish', 'https://norish.example.test', 'tok-2', 'norish', ?)
+  `).run(userId).lastInsertRowid;
+  assert.ok(norishId > 0);
+
+  // Unbekannter Provider scheitert weiterhin
+  assert.throws(() => db.prepare(`
+    INSERT INTO recipe_provider_accounts (name, base_url, api_token, provider, created_by)
+    VALUES ('Invalid', 'https://invalid.example.test', 'tok-3', 'invalid', ?)
+  `).run(userId), /CHECK constraint failed/);
+
+  // Bestand und FK pruefen
+  const mealieAccount = db.prepare('SELECT * FROM recipe_provider_accounts WHERE id = ?').get(mealieId);
+  assert.equal(mealieAccount.provider, 'mealie');
+  assert.equal(mealieAccount.name, 'Mealie');
+
+  const recipe = db.prepare('SELECT * FROM recipes WHERE id = ?').get(recipeId);
+  assert.equal(recipe.provider_account_id, mealieId);
+
+  // updated_at trigger pruefen
+  db.prepare("UPDATE recipe_provider_accounts SET name = 'Mealie Updated' WHERE id = ?").run(mealieId);
+  assert.deepEqual(db.pragma('foreign_key_check'), []);
+});

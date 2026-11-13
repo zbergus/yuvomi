@@ -12008,6 +12008,48 @@ const MIGRATIONS = [
       }
     },
   },
+  {
+    version: 283,
+    description: 'Recipe provider accounts: allow norish provider in CHECK constraint (#norish)',
+    foreignKeysOff: true,
+    up(/** @type {any} */ db) {
+      db.exec(`
+        CREATE TABLE recipe_provider_accounts_new (
+          id                INTEGER PRIMARY KEY AUTOINCREMENT,
+          name              TEXT    NOT NULL,
+          base_url          TEXT    NOT NULL,
+          api_token         TEXT    NOT NULL,
+          enabled           INTEGER NOT NULL DEFAULT 1,
+          created_by        INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          created_at        TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+          updated_at        TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+          last_sync         TEXT,
+          last_error        TEXT,
+          external_url      TEXT,
+          provider          TEXT    NOT NULL DEFAULT 'mealie' CHECK(provider IN ('mealie', 'tandoor', 'norish')),
+          last_error_reason TEXT,
+          last_error_params TEXT,
+          UNIQUE(base_url)
+        );
+
+        INSERT INTO recipe_provider_accounts_new (
+          id, name, base_url, api_token, enabled, created_by, created_at, updated_at,
+          last_sync, last_error, external_url, provider, last_error_reason, last_error_params
+        )
+        SELECT
+          id, name, base_url, api_token, enabled, created_by, created_at, updated_at,
+          last_sync, last_error, external_url, provider, last_error_reason, last_error_params
+        FROM recipe_provider_accounts;
+
+        DROP TABLE recipe_provider_accounts;
+        ALTER TABLE recipe_provider_accounts_new RENAME TO recipe_provider_accounts;
+
+        CREATE TRIGGER IF NOT EXISTS trg_recipe_provider_accounts_updated_at
+          AFTER UPDATE ON recipe_provider_accounts FOR EACH ROW
+          BEGIN UPDATE recipe_provider_accounts SET updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = OLD.id; END;
+      `);
+    },
+  },
 ];
 
 /**

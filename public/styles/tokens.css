@@ -932,6 +932,10 @@
   --source-tandoor:         var(--_source-tandoor);
   --_source-tandoor-light:  #DBEAFE;
   --source-tandoor-light:   var(--_source-tandoor-light);
+  --_source-norish:         #D97706;
+  --source-norish:          var(--_source-norish);
+  --_source-norish-light:   #FEF3C7;
+  --source-norish-light:    var(--_source-norish-light);
 
   /* --------------------------------------------------------
    * 5b. Farben - Wetterlagen
@@ -2658,6 +2662,8 @@
     --_source-mealie-light:  #0F2E2A;
     --_source-tandoor:        #60A5FA;
     --_source-tandoor-light:  #172554;
+    --_source-norish:         #FBBF24;
+    --_source-norish-light:   #451A03;
 
     /* Wetterlagen (5b) - dieselben sechs Rollen, auf der Kohle-Buehne
      * aufgehellt. Gemessen gegen #2B2825 / #37332E / #191816, schlechtester
@@ -2908,6 +2914,8 @@
     --_source-mealie-light:  #0F2E2A;
     --_source-tandoor:        #60A5FA;
     --_source-tandoor-light:  #172554;
+    --_source-norish:         #FBBF24;
+    --_source-norish-light:   #451A03;
 
     /* Wetterlagen (5b) - Zwilling des prefers-color-scheme-Blocks. */
     --_weather-clear:  #FBBF24;

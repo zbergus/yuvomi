@@ -981,7 +981,7 @@ server-side (not merely hidden in the UI) - "Duplicate" forks one into an editab
 
 | Column | Type | Constraint |
 |--------|------|-----------|
-| provider | TEXT | NOT NULL, default `'mealie'`, CHECK IN (`'mealie'`, `'tandoor'`) (migration v134) |
+| provider | TEXT | NOT NULL, default `'mealie'`, CHECK IN (`'mealie'`, `'tandoor'`, `'norish'`) (migration v134, v283) |
 | name | TEXT | NOT NULL (display name) |
 | base_url | TEXT | NOT NULL, UNIQUE — must be reachable **from the server** (often a Docker-internal Compose hostname) |
 | external_url | TEXT | nullable (migration v119) - public address used only to build "Open in Mealie/Tandoor" deep links; falls back to `base_url` when blank |
