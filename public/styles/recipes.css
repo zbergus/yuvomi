@@ -197,6 +197,10 @@
   background: var(--source-tandoor-light);
   color: var(--source-tandoor);
 }
+.source-badge--norish {
+  background: var(--source-norish-light);
+  color: var(--source-norish);
+}
 
 /* --------------------------------------------------------
  * Schmale Zeile: Aktionen ins Menü, Zutatenzahl auf eine eigene Zeile

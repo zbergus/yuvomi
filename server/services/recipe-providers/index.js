@@ -33,14 +33,16 @@
  *        Thumbnail braucht id, Tandoors slug (der gespeicherte Bildpfad). Eine
  *        einzige positionale Konvention würde bei einem der beiden Adapter
  *        stillschweigend das falsche Feld übergeben.
- * Dependencies: ./mealie.js, ./tandoor.js
+ * Dependencies: ./mealie.js, ./tandoor.js, ./norish.js
  */
 import { MealieAdapter } from './mealie.js';
 import { TandoorAdapter } from './tandoor.js';
+import { NorishAdapter } from './norish.js';
 
 const ADAPTERS = {
   mealie: MealieAdapter,
   tandoor: TandoorAdapter,
+  norish: NorishAdapter,
 };
 
 export const SUPPORTED_PROVIDERS = Object.keys(ADAPTERS);
