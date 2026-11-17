@@ -112,7 +112,7 @@ const STATUS_RESPONSE = {
         type: 'object',
         properties: {
           id: { type: 'integer' },
-          provider: { type: 'string', enum: ['mealie', 'tandoor'] },
+          provider: { type: 'string', enum: ['mealie', 'tandoor', 'norish'] },
           name: { type: 'string' },
           baseUrl: { type: 'string' },
           externalUrl: { type: ['string', 'null'] },
